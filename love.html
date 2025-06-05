@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do you love me?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            /* Updated background to a soft pink gradient */
+            background: linear-gradient(135deg, #FFDAE9 0%, #FFB6C1 100%); 
+            overflow: hidden; 
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 2.5rem 3rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            max-width: 90%;
+            width: 500px; 
+            position: relative; 
+        }
+        .question {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem; 
+            color: #FF69B4; 
+            margin-bottom: 2.5rem; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Align items if they wrap */
+            flex-wrap: wrap; /* Allow buttons to wrap */
+            gap: 1rem; /* Adjusted gap */
+            margin-bottom: 2rem;
+            position: relative; 
+            min-height: 60px; /* Ensure initial height */
+            height: auto; /* Allow it to grow */
+        }
+        .btn {
+            padding: 0.9rem 1.8rem;
+            font-size: 1.1rem; 
+            font-weight: 600;
+            border-radius: 0.75rem; 
+            cursor: pointer;
+            /* Ensure transform transition is smooth for scaling */
+            transition: background-color 0.3s ease, transform 0.3s ease, top 0.2s ease, left 0.2s ease, opacity 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+            transform-origin: center; /* Ensures scaling is from the center */
+        }
+        .btn-yes {
+            background-color: #FF69B4; 
+            color: white;
+        }
+        .btn-yes:hover {
+            background-color: #FF1493; 
+            transform: translateY(-2px); /* Existing hover effect for Yes button */
+        }
+        .btn-no {
+            background-color: #FFB6C1; 
+            color: #333;
+            position: absolute; 
+            /* Initial position will be set by JavaScript for desktop */
+        }
+        .btn-no:hover { /* This hover is for desktop color change */
+            background-color: #FFA07A; 
+        }
+        .thank-you-message {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.2rem; 
+            color: #FF1493; 
+            margin-top: 2.5rem; 
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+            .question {
+                font-size: 2rem;
+            }
+            .button-container {
+                flex-direction: column;
+                align-items: center; 
+                height: auto; 
+                gap: 1rem;
+                position: static; 
+                flex-wrap: nowrap; /* No wrap needed for column */
+            }
+            .btn {
+                width: 80%; 
+                max-width: 250px;
+            }
+            .btn-no { /* "No" button styling for mobile */
+                position: static; /* Overrides absolute positioning for mobile */
+            }
+            .thank-you-message {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <h1 class="question" id="questionText">Do you love me?</h1>
+        <div class="button-container" id="buttonContainer">
+            <button class="btn btn-yes" id="yesButton">Yes!</button> 
+            <button class="btn btn-no" id="noButton">No</button>
+        </div>
+        <div class="thank-you-message hidden" id="thankYouMessage">
+            Aww, I knew it! You made my day! how about a date tomorrow?🥰💖
+        </div>
+    </div>
+
+    <script>
+        const noButton = document.getElementById('noButton');
+        const originalYesButton = document.getElementById('yesButton'); 
+        const thankYouMessage = document.getElementById('thankYouMessage');
+        const questionText = document.getElementById('questionText');
+        const buttonContainer = document.getElementById('buttonContainer');
+        const mainContainer = document.getElementById('mainContainer');
+
+        let isMobileLayout = window.innerWidth <= 600;
+
+        // Function to handle click on any "Yes" button
+        function handleYesClick() {
+            questionText.classList.add('hidden');
+            buttonContainer.classList.add('hidden'); 
+            thankYouMessage.classList.remove('hidden');
+        }
+
+        originalYesButton.addEventListener('click', handleYesClick);
+
+        function setInitialNoButtonPosition() {
+            // Reset scale and visibility for the No button if it was previously hidden/shrunk
+            noButton.style.transform = 'scale(1)';
+            noButton.style.display = 'inline-block'; // Or 'block' depending on original display, flex for btn
+            noButton.dataset.currentScale = '1.0';
+            noButton.textContent = 'No'; // Reset text
+
+
+            if (isMobileLayout) {
+                noButton.style.position = 'static'; 
+                buttonContainer.style.position = 'static'; 
+                mainContainer.style.position = 'static'; 
+            } else { 
+                noButton.style.position = 'absolute'; 
+                buttonContainer.style.position = 'relative'; 
+                mainContainer.style.position = 'relative'; 
+
+                if (originalYesButton && originalYesButton.offsetParent) {
+                    let initialLeft = originalYesButton.offsetLeft + originalYesButton.offsetWidth + parseInt(getComputedStyle(buttonContainer).gap || '0px', 10);
+                    
+                    if (initialLeft + noButton.offsetWidth > buttonContainer.offsetWidth) {
+                        initialLeft = buttonContainer.offsetWidth - noButton.offsetWidth - 5; 
+                    }
+                    if (initialLeft < 0) initialLeft = 5; 
+
+                    noButton.style.left = initialLeft + 'px';
+                    noButton.style.top = originalYesButton.offsetTop + 'px';
+                } else {
+                    noButton.style.left = '50%'; 
+                    noButton.style.top = '0px';
+                    noButton.style.transform = 'translateX(20px)'; 
+                }
+            }
+        }
+
+        // DESKTOP: Hover over "No" button
+        noButton.addEventListener('mouseover', () => {
+            if (isMobileLayout) return; 
+
+            const newYesButton = document.createElement('button');
+            newYesButton.classList.add('btn', 'btn-yes');
+            newYesButton.textContent = 'Yes!';
+            newYesButton.addEventListener('click', handleYesClick); 
+            buttonContainer.appendChild(newYesButton); 
+
+            const mcRect = mainContainer.getBoundingClientRect(); 
+            const btnRect = noButton.getBoundingClientRect();
+            const internalPadding = 20; 
+
+            const maxX = Math.max(0, mcRect.width - btnRect.width - internalPadding * 2);
+            const maxY = Math.max(0, mcRect.height - btnRect.height - internalPadding * 2);
+
+            let randomX = Math.random() * maxX + internalPadding;
+            let randomY = Math.random() * maxY + internalPadding;
+
+            if (originalYesButton && originalYesButton.offsetParent) { 
+                const ybRect = originalYesButton.getBoundingClientRect(); 
+                const yesRelativeLeft = ybRect.left - mcRect.left;
+                const yesRelativeTop = ybRect.top - mcRect.top;
+                const safetyMargin = 10; 
+
+                let attempts = 0;
+                while (attempts < 50 && 
+                       randomX < (yesRelativeLeft + ybRect.width + safetyMargin) &&
+                       (randomX + btnRect.width) > (yesRelativeLeft - safetyMargin) &&
+                       randomY < (yesRelativeTop + ybRect.height + safetyMargin) &&
+                       (randomY + btnRect.height) > (yesRelativeTop - safetyMargin)
+                      ) {
+                    randomX = Math.random() * maxX + internalPadding;
+                    randomY = Math.random() * maxY + internalPadding;
+                    attempts++;
+                }
+            }
+            
+            noButton.style.left = `${randomX}px`;
+            noButton.style.top = `${randomY}px`;
+        });
+
+        // MOBILE: Click "No" button
+        noButton.addEventListener('click', () => {
+            if (!isMobileLayout) return; 
+
+            // Change text to "Please!" on first meaningful click
+            if (noButton.textContent === "No") {
+                noButton.textContent = "Please!";
+            }
+
+            // Get current scale from data attribute, default to 1.0
+            let currentScale = parseFloat(noButton.dataset.currentScale || '1.0');
+            
+            // Reduce scale
+            let newScale = currentScale * 0.8; // Shrink by 20% of current size
+
+            if (newScale < 0.15) { // Threshold for invisibility
+                noButton.style.display = 'none';
+            } else {
+                noButton.style.transform = `scale(${newScale})`;
+                noButton.dataset.currentScale = newScale.toString(); // Store the new scale
+            }
+            
+            // Removed: Spawning new "Yes" button on mobile click
+        });
+
+
+        function handleResize() {
+            const currentlyMobile = window.innerWidth <= 600;
+            if (currentlyMobile !== isMobileLayout) { 
+                isMobileLayout = currentlyMobile;
+                setInitialNoButtonPosition(); // This will also reset the No button's text and scale
+            } else { 
+                 setInitialNoButtonPosition(); 
+            }
+        }
+
+        window.addEventListener('load', () => {
+            isMobileLayout = window.innerWidth <= 600; 
+            setInitialNoButtonPosition(); 
+        });
+        window.addEventListener('resize', handleResize); 
+
+    </script>
+</body>
+</html>
